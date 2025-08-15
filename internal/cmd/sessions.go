@@ -107,9 +107,108 @@ var deleteSessionCmd = &cobra.Command{
 	},
 }
 
+var deleteAllSessionsCmd = &cobra.Command{
+	Use:   "delete-all",
+	Short: "Delete all saved sessions",
+	Long:  `Delete all saved sessions with confirmation.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		app, err := setupApp(cmd)
+		if err != nil {
+			return err
+		}
+		defer app.Shutdown()
+
+		// Get all sessions
+		sessions, err := app.Sessions.List(cmd.Context())
+		if err != nil {
+			return fmt.Errorf("failed to list sessions: %w", err)
+		}
+
+		if len(sessions) == 0 {
+			fmt.Println("No sessions found to delete.")
+			return nil
+		}
+
+		// Confirm deletion
+		fmt.Printf("Are you sure you want to delete all %d sessions? This action cannot be undone. (y/N): ", len(sessions))
+		var confirmation string
+		fmt.Scanln(&confirmation)
+
+		if confirmation != "y" && confirmation != "Y" {
+			fmt.Println("Deletion cancelled.")
+			return nil
+		}
+
+		// Delete all sessions
+		deletedCount := 0
+		for _, session := range sessions {
+			err = app.Sessions.Delete(cmd.Context(), session.ID)
+			if err != nil {
+				fmt.Printf("Failed to delete session '%s' (%s): %v\n", session.Title, session.ID, err)
+			} else {
+				deletedCount++
+			}
+		}
+
+		fmt.Printf("Deleted %d out of %d sessions.\n", deletedCount, len(sessions))
+		return nil
+	},
+}
+
+var exportAllSessionsCmd = &cobra.Command{
+	Use:   "export-all",
+	Short: "Export all sessions",
+	Long:  `Export all sessions to JSON files.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		app, err := setupApp(cmd)
+		if err != nil {
+			return err
+		}
+		defer app.Shutdown()
+
+		// Get all sessions
+		sessions, err := app.Sessions.List(cmd.Context())
+		if err != nil {
+			return fmt.Errorf("failed to list sessions: %w", err)
+		}
+
+		if len(sessions) == 0 {
+			fmt.Println("No sessions found to export.")
+			return nil
+		}
+
+		// Export each session
+		exportedCount := 0
+		for _, session := range sessions {
+			// Get the messages
+			messages, err := app.Messages.List(cmd.Context(), session.ID)
+			if err != nil {
+				fmt.Printf("Failed to get messages for session '%s' (%s): %v\n", session.Title, session.ID, err)
+				continue
+			}
+
+			// Create filename
+			filename := fmt.Sprintf("session_%s_%s.json", session.ID, time.Now().Format("20060102_150405"))
+
+			// Export session
+			err = ExportAsJSON(filename, session, messages)
+			if err != nil {
+				fmt.Printf("Failed to export session '%s' (%s): %v\n", session.Title, session.ID, err)
+			} else {
+				exportedCount++
+			}
+		}
+
+		fmt.Printf("Exported %d out of %d sessions.\n", exportedCount, len(sessions))
+		return nil
+	},
+}
+
 func init() {
 	sessionsCmd.AddCommand(listSessionsCmd)
 	sessionsCmd.AddCommand(continueSessionCmd)
 	sessionsCmd.AddCommand(deleteSessionCmd)
+	sessionsCmd.AddCommand(deleteAllSessionsCmd)
+	sessionsCmd.AddCommand(exportAllSessionsCmd)
 	rootCmd.AddCommand(sessionsCmd)
 }

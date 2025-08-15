@@ -84,6 +84,46 @@ Added new CLI commands for managing chat sessions:
 - Deletes a saved session by providing the session ID
 - Usage: `crush sessions delete [session-id]`
 
+### `sessions delete-all`
+- Deletes all saved sessions with confirmation
+- Usage: `crush sessions delete-all`
+
+### `sessions export-all`
+- Exports all sessions to JSON files
+- Usage: `crush sessions export-all`
+
+## Session Summarization
+
+Added new CLI command for summarizing sessions:
+
+### `summarize`
+- Generates a summary of a session's conversation
+- Usage: `crush summarize [session-id]`
+
+## Session Search
+
+Added new CLI command for searching sessions:
+
+### `search`
+- Searches through session titles or content
+- Usage: `crush search [query]`
+
+## Template Management
+
+Added new CLI commands for managing prompt templates:
+
+### `templates list`
+- Lists all prompt templates
+- Usage: `crush templates list`
+
+### `templates create`
+- Creates a new prompt template
+- Usage: `crush templates create [name]`
+
+### `templates use`
+- Uses a prompt template to generate a prompt
+- Usage: `crush templates use [name]`
+
 ## Usage Tracking
 
 Added new CLI command for viewing usage and costs:

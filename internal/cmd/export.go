@@ -1,11 +1,13 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/charmbracelet/crush/internal/message"
+	"github.com/charmbracelet/crush/internal/session"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +49,7 @@ var exportCmd = &cobra.Command{
 		// Export based on format
 		switch format {
 		case "json":
-			return exportAsJSON(filename, session, messages)
+			return ExportAsJSON(filename, session, messages)
 		case "markdown":
 			return exportAsMarkdown(filename, session, messages)
 		default:
@@ -56,34 +58,41 @@ var exportCmd = &cobra.Command{
 	},
 }
 
-func exportAsJSON(filename string, session interface{}, messages interface{}) error {
-	data := map[string]interface{}{
-		"session":  session,
-		"messages": messages,
+func exportAsMarkdown(filename string, session session.Session, messages []message.Message) error {
+	var content strings.Builder
+	
+	// Add session header
+	content.WriteString(fmt.Sprintf("# Session: %s\n\n", session.Title))
+	content.WriteString(fmt.Sprintf("**ID:** %s\n\n", session.ID))
+	content.WriteString(fmt.Sprintf("**Created:** %s\n\n", time.Unix(session.CreatedAt, 0).Format("2006-01-02 15:04:05")))
+	content.WriteString(fmt.Sprintf("**Last Updated:** %s\n\n", time.Unix(session.UpdatedAt, 0).Format("2006-01-02 15:04:05")))
+	content.WriteString(fmt.Sprintf("**Prompt Tokens:** %d\n\n", session.PromptTokens))
+	content.WriteString(fmt.Sprintf("**Completion Tokens:** %d\n\n", session.CompletionTokens))
+	content.WriteString(fmt.Sprintf("**Cost:** $%.4f\n\n", session.Cost))
+	
+	// Add conversation
+	content.WriteString("## Conversation\n\n")
+	
+	for _, msg := range messages {
+		// Add role header
+		var role string
+		switch msg.Role {
+		case message.User:
+			role = "User"
+		case message.Assistant:
+			role = "Assistant"
+		default:
+			role = string(msg.Role)
+		}
+		
+		content.WriteString(fmt.Sprintf("### %s (%s)\n\n", role, time.Unix(msg.CreatedAt, 0).Format("2006-01-02 15:04:05")))
+		
+		// Add message content
+		content.WriteString(msg.Content().String())
+		content.WriteString("\n\n")
 	}
 	
-	file, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(data); err != nil {
-		return fmt.Errorf("failed to encode JSON: %w", err)
-	}
-
-	fmt.Printf("Session exported to %s\n", filename)
-	return nil
-}
-
-func exportAsMarkdown(filename string, session interface{}, messages interface{}) error {
-	// For now, we'll just create a simple markdown file
-	// In a full implementation, we'd format the messages properly
-	content := fmt.Sprintf("# Session Export\n\nSession data would be here in a full implementation.\n")
-	
-	return os.WriteFile(filename, []byte(content), 0644)
+	return os.WriteFile(filename, []byte(content.String()), 0644)
 }
 
 func init() {
