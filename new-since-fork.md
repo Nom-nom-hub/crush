@@ -18,6 +18,14 @@ Added new CLI commands for viewing the current configuration:
 - Displays the current configuration settings in a formatted JSON structure
 - Usage: `crush config view`
 
+### `config set`
+- Sets a configuration value by specifying the key and value
+- Usage: `crush config set [key] [value]`
+
+### `config edit`
+- Opens the configuration file in the default editor
+- Usage: `crush config edit`
+
 ## Context Management
 
 Added new CLI commands for viewing context paths:
@@ -46,7 +54,20 @@ Added new specialized agents and tools:
 - A specialized agent for software architecture and design
 - Accessible through the `architect` tool
 
-## Sessions Management
+## Session Export/Import
+
+Added new CLI commands for exporting and importing sessions:
+
+### `export`
+- Exports a session's conversation history to a file
+- Supports JSON and markdown formats
+- Usage: `crush export [session-id] [--format json|markdown]`
+
+### `import`
+- Imports a session from a file
+- Usage: `crush import [file]`
+
+## Session Management
 
 Added new CLI commands for managing chat sessions:
 
@@ -58,3 +79,23 @@ Added new CLI commands for managing chat sessions:
 - Provides instructions on how to continue a conversation from a saved session
 - Usage: `crush sessions continue [session-id]`
 - Note: Currently directs users to use the TUI session switcher (Ctrl+S) to load the specified session
+
+### `sessions delete`
+- Deletes a saved session by providing the session ID
+- Usage: `crush sessions delete [session-id]`
+
+## Usage Tracking
+
+Added new CLI command for viewing usage and costs:
+
+### `usage`
+- Views token usage and associated costs for sessions or overall usage
+- Usage: `crush usage`
+
+## Model Testing
+
+Added new CLI command for testing models:
+
+### `test-model`
+- Quickly tests a specific model with a prompt without starting a full session
+- Usage: `crush test-model [provider] [model] [prompt]`

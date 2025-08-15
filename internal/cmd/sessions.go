@@ -66,8 +66,50 @@ var continueSessionCmd = &cobra.Command{
 	},
 }
 
+var deleteSessionCmd = &cobra.Command{
+	Use:   "delete [session-id]",
+	Short: "Delete a saved session",
+	Long:  `Delete a saved session by providing the session ID.`,
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		sessionID := args[0]
+
+		app, err := setupApp(cmd)
+		if err != nil {
+			return err
+		}
+		defer app.Shutdown()
+
+		// Get the session to delete
+		session, err := app.Sessions.Get(cmd.Context(), sessionID)
+		if err != nil {
+			return fmt.Errorf("failed to get session: %w", err)
+		}
+
+		// Confirm deletion
+		fmt.Printf("Are you sure you want to delete session '%s' (%s)? (y/N): ", session.Title, sessionID)
+		var confirmation string
+		fmt.Scanln(&confirmation)
+
+		if confirmation != "y" && confirmation != "Y" {
+			fmt.Println("Deletion cancelled.")
+			return nil
+		}
+
+		// Delete the session
+		err = app.Sessions.Delete(cmd.Context(), sessionID)
+		if err != nil {
+			return fmt.Errorf("failed to delete session: %w", err)
+		}
+
+		fmt.Printf("Session '%s' (%s) deleted successfully.\n", session.Title, sessionID)
+		return nil
+	},
+}
+
 func init() {
 	sessionsCmd.AddCommand(listSessionsCmd)
 	sessionsCmd.AddCommand(continueSessionCmd)
+	sessionsCmd.AddCommand(deleteSessionCmd)
 	rootCmd.AddCommand(sessionsCmd)
 }
