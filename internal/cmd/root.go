@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/crush/internal/app"
 	"github.com/charmbracelet/crush/internal/config"
 	"github.com/charmbracelet/crush/internal/db"
+	"github.com/charmbracelet/crush/internal/session"
 	"github.com/charmbracelet/crush/internal/tui"
 	"github.com/charmbracelet/crush/internal/version"
 	"github.com/charmbracelet/fang"
@@ -159,4 +160,21 @@ func ResolveCwd(cmd *cobra.Command) (string, error) {
 		return "", fmt.Errorf("failed to get current working directory: %v", err)
 	}
 	return cwd, nil
+}
+
+// setupTUIWithSession sets up the TUI with a specific session.
+func setupTUIWithSession(cmd *cobra.Command, app *app.App, session session.Session) *tea.Program {
+	// Create the TUI model
+	tuiModel := tui.New(app)
+
+	// Set up the TUI program
+	program := tea.NewProgram(
+		tuiModel,
+		tea.WithAltScreen(),
+		tea.WithContext(cmd.Context()),
+		tea.WithMouseCellMotion(),            // Use cell motion instead of all motion to reduce event flooding
+		tea.WithFilter(tui.MouseEventFilter), // Filter mouse events based on focus state
+	)
+
+	return program
 }
