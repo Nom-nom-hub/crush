@@ -5,7 +5,6 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/charmbracelet/crush/internal/llm/tools"
 	"github.com/spf13/cobra"
 )
 
@@ -32,19 +31,21 @@ var listToolsCmd = &cobra.Command{
 			Name        string
 			Description string
 		}{
-			{tools.BashToolName, "Execute bash commands"},
-			{tools.ViewToolName, "View file contents"},
-			{tools.EditToolName, "Edit file contents"},
-			{tools.MultiEditToolName, "Edit multiple files"},
-			{tools.WriteToolName, "Write new files"},
-			{tools.FetchToolName, "Fetch content from URLs"},
-			{tools.DownloadToolName, "Download files from URLs"},
-			{tools.GlobToolName, "Find files matching a pattern"},
-			{tools.GrepToolName, "Search for patterns in files"},
-			{tools.LSToolName, "List directory contents"},
-			{tools.SourcegraphToolName, "Search code with Sourcegraph"},
-			{tools.DiagnosticsToolName, "Get LSP diagnostics for files"},
-			{"Agent", "Launch a new agent with a subset of tools"},
+			{"bash", "Execute bash commands"},
+			{"view", "View file contents"},
+			{"edit", "Edit file contents"},
+			{"multiedit", "Edit multiple files"},
+			{"write", "Write new files"},
+			{"fetch", "Fetch content from URLs"},
+			{"download", "Download files from URLs"},
+			{"glob", "Find files matching a pattern"},
+			{"grep", "Search for patterns in files"},
+			{"ls", "List directory contents"},
+			{"sourcegraph", "Search code with Sourcegraph"},
+			{"diagnostics", "Get LSP diagnostics for files"},
+			{"agent", "Launch a new agent with a subset of tools"},
+			{"debugger", "Launch a specialized debugging agent"},
+			{"architect", "Launch a specialized architecture agent"},
 		}
 
 		for _, tool := range builtinTools {

@@ -34,6 +34,18 @@ Added new CLI commands for viewing available tools:
 - Lists the tools that are available for use by Crush
 - Usage: `crush tools list`
 
+## Specialized Agents
+
+Added new specialized agents and tools:
+
+### Debugger Agent
+- A specialized agent for debugging code and fixing errors
+- Accessible through the `debugger` tool
+
+### Architect Agent
+- A specialized agent for software architecture and design
+- Accessible through the `architect` tool
+
 ## Sessions Management
 
 Added new CLI commands for managing chat sessions:
